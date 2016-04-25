@@ -1,3 +1,3 @@
-export SwipeGallery from './SwipeGallery.js';
+import SwipeGallery from './SwipeGallery.js';
 
-
+export default SwipeGallery;

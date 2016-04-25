@@ -5,27 +5,84 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 const { describe, it } = global;
 
-describe('Swipe gallery', () => {
-  it('Render a component and contain the element', () => {
-    const elements = [(
-      <div>Hello</div>
-    )];
-
-    const wrapper = shallow(<SwipeGallery elements={elements}></SwipeGallery>);
-    expect(wrapper.text()).to.be.equal('Hello');
-  });
-
-  it('should handle the click event', () => {
-    const clickMe = sinon.stub();
-    // Here we do a JSDOM render. So, that's why we need to
-    // wrap this with a div.
-    const wrapper = mount(
-      <div>
-        <Button onClick={ clickMe }>ClickMe</Button>
+function getElements(numElements) {
+  const elements = [];
+  for (let i = 0; i < numElements; ++i) {
+    elements.push(
+      <div className="subelement" key={i}>
+        { i }
       </div>
     );
+  }
+  return elements;
+}
 
-    wrapper.find('button').simulate('click');
-    expect(clickMe.callCount).to.be.equal(1);
+const fakeEvent = {
+  preventDefault: () => undefined,
+  stopPropagation: () => undefined,
+};
+
+describe('Swipe gallery', () => {
+  it('Render a component and contain the element', () => {
+    const wrapper = shallow(<SwipeGallery elements={getElements(3)} />);
+    expect(wrapper.find('.subelement')).to.have.length(3);
   });
+
+  it('Render max elements', () => {
+    const elements = getElements(5);
+
+    const wrapper = shallow(
+      <SwipeGallery
+        elements= {elements}
+        maxElements={3}
+      />
+    );
+    expect(wrapper.find('.subelement')).to.have.length(3);
+  });
+
+  it('Show next button and previous button', () => {
+    const elements = getElements(3);
+
+    const wrapper = shallow(
+      <SwipeGallery
+        elements={elements}
+        maxElements={3}
+      />
+    );
+
+    expect(wrapper.find('.SwipeGallery-next')).to.have.length(1);
+    expect(wrapper.find('.SwipeGallery-previous')).to.have.length(1);
+  });
+
+  it('Check if on click in next button go to the next element', () => {
+    const elements = getElements(5);
+    const onChange = sinon.spy();
+    const wrapper = shallow(
+      <SwipeGallery
+        elements={elements}
+        maxElements={3}
+        onChangePosition= {onChange}
+      />
+    );
+    wrapper.find('.SwipeGallery-next').simulate('click', fakeEvent);
+    expect(onChange.callCount).to.be.equal(1);
+    expect(onChange.calledWith(1)).to.be.true;
+  });
+
+  it('Check if on click in previous button go to the last element', () => {
+    const numElements = 5;
+    const elements = getElements(numElements);
+    const onChange = sinon.spy();
+    const wrapper = shallow(
+      <SwipeGallery
+        elements={elements}
+        maxElements={3}
+        onChangePosition= {onChange}
+      />
+    );
+    wrapper.find('.SwipeGallery-previous').simulate('click', fakeEvent);
+    expect(onChange.callCount).to.be.equal(1);
+    expect(onChange.calledWith(numElements)).to.be.true;
+  });
+
 });

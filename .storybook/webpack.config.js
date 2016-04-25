@@ -11,9 +11,15 @@ const config = {
   module: {
     loaders: [
       {
-        test: /\.css?$/,
-        loaders: ['style', 'raw'],
-        include: path.resolve(__dirname, '../'),
+        test: /\.styl$/,
+        loader: 'style!css?modules&importLoaders=2&sourceMap&localIdentName=[local]!stylus?outputStyle=expanded&sourceMap',
+      },
+      {
+        test: /\.css$/,
+        loaders: [
+          'style-loader',
+          'css-loader?modules&importLoaders=1&localIdentName=[local]',
+        ],
       },
     ],
   },

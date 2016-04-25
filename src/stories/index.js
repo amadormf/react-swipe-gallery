@@ -1,21 +1,21 @@
 import React from 'react';
 import { storiesOf, action } from '@kadira/storybook';
-import Button from '../index';
+import SwipeGallery from '../index';
+
+function getElements(numElements) {
+  const elements = [];
+  for (let i = 1; i <= numElements; ++i) {
+    elements.push(
+      <div className="subelement">{ i }</div>
+    );
+  }
+  return elements;
+}
 
 storiesOf('Button', module)
   .add('default view', () => (
-    <Button onClick={ action('button clicked') }>Hello</Button>
-  ))
-  .add('some emojies as the text', () => (
-    <Button>😀 😎 👍 💯</Button>
-  ))
-  .add('custom styles', () => {
-    const style = {
-      fontSize: 20,
-      textTransform: 'uppercase',
-      color: '#FF8833',
-    };
-    return (
-      <Button style={ style }>Hello</Button>
-    );
-  });
+    <SwipeGallery
+      elements={ getElements(5) }
+      maxElements={3}
+    />
+  ));
