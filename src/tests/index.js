@@ -1,15 +1,18 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
-import Button from '../index';
+import SwipeGallery from '../index';
 import { expect } from 'chai';
 import sinon from 'sinon';
 const { describe, it } = global;
 
-describe('Button', () => {
-  it('should show the given text', () => {
-    const text = 'The Text';
-    const wrapper = shallow(<Button>{text}</Button>);
-    expect(wrapper.text()).to.be.equal(text);
+describe('Swipe gallery', () => {
+  it('Render a component and contain the element', () => {
+    const elements = [(
+      <div>Hello</div>
+    )];
+
+    const wrapper = shallow(<SwipeGallery elements={elements}></SwipeGallery>);
+    expect(wrapper.text()).to.be.equal('Hello');
   });
 
   it('should handle the click event', () => {

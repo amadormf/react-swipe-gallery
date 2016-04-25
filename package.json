@@ -13,7 +13,7 @@
     "lint:fix": "eslint src --fix",
     "test": "mocha --require .scripts/mocha_runner src/**/tests/**/*.js",
     "test:karma": "karma start",
-    "test:watch": "npm run testonly -- --watch --watch-extensions js",
+    "test:watch": "npm run test -- --watch --watch-extensions js",
     "storybook": "start-storybook -p 9010",
     "publish-storybook": "bash .scripts/publish_storybook.sh",
     "karma": "karma start",
@@ -81,4 +81,3 @@
     "run": "lint, test"
   }
 }
-
