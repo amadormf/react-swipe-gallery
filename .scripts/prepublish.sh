@@ -9,7 +9,7 @@
 echo "=> Transpiling 'src' into ES5 ..."
 echo ""
 rm -rf ./lib
-./node_modules/.bin/babel --ignore tests,stories --plugins "transform-runtime" ./src --out-dir ./lib
+./node_modules/.bin/webpack
 echo ""
 echo "=> Transpiling completed."
 

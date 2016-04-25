@@ -3,5 +3,17 @@
   &-previous
   &-next
     font-size 1.2em
+    display flex
+    cursor pointer
+    &--rotate90
+      margin 0 auto
+      & > div
+        transform rotate(90deg)
+        transfor-origin left
+
   &-container
     display flex
+  &--vertical
+    flex-direction column
+    & .SwipeGallery-container
+      justify-content center

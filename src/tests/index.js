@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-expressions */
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import SwipeGallery from '../index';
 import { expect } from 'chai';
 import sinon from 'sinon';
@@ -84,7 +84,6 @@ describe('Swipe gallery', () => {
     );
 
     const buttonNext = wrapper.find('.SwipeGallery-next');
-    const container = wrapper.find('.SwipeGallery-container');
     buttonNext.simulate('click', fakeEvent);
     expect(onChange.calledWith(1, [1, 2, 3])).to.be.true;
 
@@ -101,6 +100,37 @@ describe('Swipe gallery', () => {
     expect(onChange.calledWith(0, [0, 1, 2])).to.be.true;
   });
 
+  it('Check if click in previous button many times get the correct positiion', () => {
+    const numElements = 5;
+    const elements = getElements(numElements);
+    const onChange = sinon.spy();
+
+    const wrapper = shallow(
+      <SwipeGallery
+        elements={elements}
+        maxElements={3}
+        onChangePosition= {onChange}
+      />
+    );
+
+    const buttonPrevious = wrapper.find('.SwipeGallery-previous');
+
+    buttonPrevious.simulate('click', fakeEvent);
+    expect(onChange.calledWith(4, [4, 0, 1])).to.be.true;
+
+    buttonPrevious.simulate('click', fakeEvent);
+    expect(onChange.calledWith(3, [3, 4, 0])).to.be.true;
+
+    buttonPrevious.simulate('click', fakeEvent);
+    expect(onChange.calledWith(2, [2, 3, 4])).to.be.true;
+
+    buttonPrevious.simulate('click', fakeEvent);
+    expect(onChange.calledWith(1, [1, 2, 3])).to.be.true;
+
+    buttonPrevious.simulate('click', fakeEvent);
+    expect(onChange.calledWith(0, [0, 1, 2])).to.be.true;
+  });
+
   it('Check if on click in previous button go to the last element', () => {
     const numElements = 5;
     const elements = getElements(numElements);
@@ -114,7 +144,17 @@ describe('Swipe gallery', () => {
     );
     wrapper.find('.SwipeGallery-previous').simulate('click', fakeEvent);
     expect(onChange.callCount).to.be.equal(1);
-    expect(onChange.calledWith(numElements)).to.be.true;
+    expect(onChange.calledWith(numElements - 1)).to.be.true;
+  });
+
+  it('Check if send a custom class, this is used', () => {
+    const wrapper = shallow(
+      <SwipeGallery
+        elements={getElements(5)}
+        className="TestClass"
+      />
+    );
+    expect(wrapper.find('.TestClass')).to.have.length(1);
   });
 
   it('Check if send prop orientation vertical, change class name of buttons', () => {

@@ -1,5 +1,5 @@
 import React, { PropTypes } from 'react';
-import styles from './styles/SwipeGallery.styl';
+import Swipeable from 'react-swipeable';
 import classNames from 'classnames';
 
 export default class SwipeGallery extends React.Component {
@@ -11,6 +11,7 @@ export default class SwipeGallery extends React.Component {
     maxElements: PropTypes.number,
     onChangePosition: PropTypes.function,
     orientation: PropTypes.string,
+    className: PropTypes.string,
   };
 
   static defaultProps = {
@@ -57,7 +58,7 @@ export default class SwipeGallery extends React.Component {
     if (calculateNewPosition >= elementsCount) {
       calculateNewPosition = 0;
     } else if (calculateNewPosition < 0) {
-      calculateNewPosition = elementsCount;
+      calculateNewPosition = elementsCount - 1;
     }
     return calculateNewPosition;
   }
@@ -78,36 +79,81 @@ export default class SwipeGallery extends React.Component {
     });
   }
 
-  _getSwipeableContainer(childs) {
-
-  }
-
   render() {
-    const { orientation } = this.props;
+    const { orientation, className } = this.props;
+
+    const swipeGalleryClasses = classNames({
+      SwipeGallery: true,
+      'SwipeGallery--vertical': orientation === SwipeGallery.VERTICAL,
+      [className]: !!className,
+    });
+
+    const arrowClassesLeft = classNames({
+      'SwipeGallery-previous': true,
+      'SwipeGallery-previous--rotate90': orientation === SwipeGallery.VERTICAL,
+    });
+
+    const arrowClassesRight = classNames({
+      'SwipeGallery-next': true,
+      'SwipeGallery-next--rotate90': orientation === SwipeGallery.VERTICAL,
+    });
+
     return (
-      <div className = {styles.SwipeGallery} >
-        <div
-          className={styles['SwipeGallery-previous']}
-          onClick={(e) => {
-            this._move(e, -1);
-          }}
-        >
-          {'<'}
+      <Swipeable
+        onSwipingUp = {
+          (e) => {
+            if (orientation === SwipeGallery.VERTICAL) {
+              this._move(e, 1);
+            }
+          }
+        }
+        onSwipingDown = {
+          (e) => {
+            if (orientation === SwipeGallery.VERTICAL) {
+              this._move(e, -1);
+            }
+          }
+        }
+        onSwipingRight = {
+          (e) => {
+            if (orientation === SwipeGallery.HORIZONTAL) {
+              this._move(e, 1);
+            }
+          }
+        }
+        onSwipingLeft = {
+          (e) => {
+            if (orientation === SwipeGallery.HORIZONTAL) {
+              this._move(e, -1);
+            }
+          }
+        }
+      >
+        <div className = {swipeGalleryClasses} >
+          <div
+            className={arrowClassesLeft}
+            onClick={(e) => {
+              this._move(e, -1);
+            }}
+          >
+            <div>{'❮'}</div>
+          </div>
+          <div
+            className={'SwipeGallery-container'}
+          >
+            {this._getVisibleElements()}
+
+          </div>
+          <div
+            className = {arrowClassesRight}
+            onClick={(e) => {
+              this._move(e, 1);
+            }}
+          >
+            <div>{'❯'}</div>
+          </div>
         </div>
-        <div
-          className={styles['SwipeGallery-container']}
-        >
-          {this._getVisibleElements()}
-        </div>
-        <div
-          className = {styles['SwipeGallery-next']}
-          onClick={(e) => {
-            this._move(e, 1);
-          }}
-        >
-          {'>'}
-        </div>
-      </div>
+      </Swipeable>
     );
   }
 }
