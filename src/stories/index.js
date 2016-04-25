@@ -6,7 +6,7 @@ function getElements(numElements) {
   const elements = [];
   for (let i = 1; i <= numElements; ++i) {
     elements.push(
-      <div className="subelement">{ i }</div>
+      <img src={`http://loremflickr.com/320/240?random=${i}`} alt={i}></img>
     );
   }
   return elements;

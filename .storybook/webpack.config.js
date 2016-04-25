@@ -12,7 +12,8 @@ const config = {
     loaders: [
       {
         test: /\.styl$/,
-        loader: 'style!css?modules&importLoaders=2&sourceMap&localIdentName=[local]!stylus?outputStyle=expanded&sourceMap',
+        loader: 'style!css?modules&importLoaders=2&sourceMap&localIdentName=[local]' +
+          '!stylus?outputStyle=expanded&sourceMap',
       },
       {
         test: /\.css$/,
