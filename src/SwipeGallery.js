@@ -13,10 +13,12 @@ export default class SwipeGallery extends React.Component {
     onChangePosition: PropTypes.function,
     orientation: PropTypes.string,
     className: PropTypes.string,
+    buffer: PropTypes.bool,
   };
 
   static defaultProps = {
     orientation: SwipeGallery.HORIZONTAL,
+    buffer: false,
   };
 
   constructor(props) {
@@ -28,8 +30,59 @@ export default class SwipeGallery extends React.Component {
     };
   }
 
+  _wrapElement(visible, element, position, index) {
+    const classWrap = classNames({
+      'SwipeGallery-element--visible': visible,
+      'SwipeGallery-element--invisible': !visible,
+      'SwipeGallery-element--left': position === 'left',
+      'SwipeGallery-element--right': position === 'right',
+      'SwipeGallery-element--top': position === 'top',
+      'SwipeGallery-element--bottom': position === 'bottom',
+    });
+    return (
+      <div className={classWrap} key={index}>
+        {element}
+      </div>
+    );
+  }
+
   _getVisibleElements() {
-    return this.state.visiblePositions.map(position => this.props.elements[position]);
+    const elements = [];
+    if (this.props.buffer) {
+      let firstPosition = this.state.visiblePositions[0] - 1;
+      if (firstPosition < 0) {
+        firstPosition = this.props.elements.length - 1;
+      }
+      elements.push(
+        this._wrapElement(
+          false,
+          this.props.elements[firstPosition],
+          this.props.orientation === SwipeGallery.HORIZONTAL ? 'left' : 'top',
+          firstPosition
+        )
+      );
+    }
+
+
+    for (const position of this.state.visiblePositions) {
+      elements.push(this._wrapElement(true, this.props.elements[position], null, position));
+    }
+
+    if (this.props.buffer) {
+      let lastPosition = this.state.visiblePositions[this.state.visiblePositions.length - 1] + 1;
+      if (lastPosition >= this.props.elements.length) {
+        lastPosition = 0;
+      }
+      elements.push(
+        this._wrapElement(
+          false,
+          this.props.elements[lastPosition],
+          this.props.orientation === SwipeGallery.HORIZONTAL ? 'right' : 'bottom',
+          lastPosition
+        )
+      );
+    }
+    return elements;
   }
 
   _getVisiblePositions(actualPosition) {

@@ -12,7 +12,7 @@ function getElements(numElements) {
     backgroundColor: 'grey',
     textAlign: 'center',
   };
-  for (let i = 1; i <= numElements; ++i) {
+  for (let i = 0; i < numElements; ++i) {
     elements.push(
       <div style={styles}><span>{i}</span></div>
     );
@@ -33,4 +33,12 @@ storiesOf('Button', module)
       maxElements={3}
       orientation={SwipeGallery.VERTICAL}
     />
-  ));
+  ))
+  .add('With buffer', () => (
+    <SwipeGallery
+      elements={ getElements(5) }
+      maxElements={3}
+      buffer
+    />
+  ))
+;

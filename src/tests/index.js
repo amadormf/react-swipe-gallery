@@ -233,3 +233,31 @@ describe('SwipeGallery, swipe move', () => {
     }, 200);
   });
 });
+
+
+describe('Swipe gallery with prop buffer=true', () => {
+  let elements;
+  let wrapper;
+  let onChange;
+
+  before(() => {
+    elements = getElements(5);
+  });
+
+  beforeEach(() => {
+    onChange = sinon.spy();
+    wrapper = shallow(
+      <SwipeGallery
+        elements={elements}
+        maxElements={3}
+        onChangePosition={onChange}
+        buffer
+      />
+    );
+  });
+  it('Expect have visible 3 elements, but load 5 element (2 of buffer)', () => {
+    expect(wrapper.find('.subelement')).to.have.length(5);
+    expect(wrapper.find('.SwipeGallery-element--visible')).to.have.length(3);
+    expect(wrapper.find('.SwipeGallery-element--invisible')).to.have.length(2);
+  });
+});
