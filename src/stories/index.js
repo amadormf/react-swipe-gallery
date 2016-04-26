@@ -4,9 +4,17 @@ import SwipeGallery from '../index';
 
 function getElements(numElements) {
   const elements = [];
+  const styles = {
+    width: '200px',
+    height: '200px',
+    fontSize: '3em',
+    margin: '2px',
+    backgroundColor: 'grey',
+    textAlign: 'center',
+  };
   for (let i = 1; i <= numElements; ++i) {
     elements.push(
-      <img src={`http://loremflickr.com/320/240?random=${i}`} alt={i}></img>
+      <div style={styles}><span>{i}</span></div>
     );
   }
   return elements;
