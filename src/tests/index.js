@@ -4,7 +4,7 @@ import { shallow } from 'enzyme';
 import SwipeGallery from '../index';
 import { expect } from 'chai';
 import sinon from 'sinon';
-const { describe, it } = global;
+const { describe, it, before, beforeEach } = global;
 
 function getElements(numElements) {
   const elements = [];
@@ -165,5 +165,71 @@ describe('Swipe gallery', () => {
       />
     );
     expect(wrapper.find('.SwipeGallery--vertical')).to.have.length(1);
+  });
+});
+
+describe('SwipeGallery, swipe move', () => {
+  let elements;
+  let wrapper;
+  let onChange;
+
+  before(() => {
+    elements = getElements(5);
+  });
+
+  beforeEach(() => {
+    onChange = sinon.spy();
+    wrapper = shallow(
+      <SwipeGallery
+        elements={elements}
+        maxElements={3}
+        onChangePosition={onChange}
+      />
+    );
+  });
+
+  it('Check swipe left move', () => {
+    wrapper.prop('onSwipingLeft')(fakeEvent);
+    expect(onChange.callCount).to.be.equal(1);
+    expect(onChange.calledWith(1, [1, 2, 3])).to.be.true;
+  });
+
+  it('Check swipe right move', () => {
+    wrapper.prop('onSwipingRight')(fakeEvent);
+    expect(onChange.callCount).to.be.equal(1);
+    expect(onChange.calledWith(4, [4, 0, 1])).to.be.true;
+  });
+
+  it('Check swipe up move', () => {
+    wrapper.setProps({ orientation: SwipeGallery.VERTICAL });
+    wrapper.update();
+    wrapper.prop('onSwipingUp')(fakeEvent);
+    expect(onChange.callCount).to.be.equal(1);
+    expect(onChange.calledWith(1, [1, 2, 3])).to.be.true;
+  });
+
+  it('Check swipe up move', () => {
+    wrapper.setProps({ orientation: SwipeGallery.VERTICAL });
+    wrapper.update();
+    wrapper.prop('onSwipingDown')(fakeEvent);
+    expect(onChange.callCount).to.be.equal(1);
+    expect(onChange.calledWith(4, [4, 0, 1])).to.be.true;
+  });
+
+  it('Check swipe don\'t allow quickly move', () => {
+    wrapper.prop('onSwipingRight')(fakeEvent);
+    expect(onChange.callCount).to.be.equal(1);
+    wrapper.prop('onSwipingRight')(fakeEvent);
+    expect(onChange.callCount).to.be.equal(1);
+  });
+
+  it('Check swipe move with timeout', (cb) => {
+    wrapper.prop('onSwipingRight')(fakeEvent);
+    expect(onChange.callCount).to.be.equal(1);
+    setTimeout(() => {
+      wrapper.prop('onSwipingRight')(fakeEvent);
+      expect(onChange.callCount).to.be.equal(2);
+      cb();
+    }, 200);
   });
 });

@@ -21,6 +21,7 @@ export default class SwipeGallery extends React.Component {
 
   constructor(props) {
     super(props);
+    this.allowSwipe = true;
     this.state = {
       actualPosition: 0,
       visiblePositions: this._getVisiblePositions(0),
@@ -80,6 +81,16 @@ export default class SwipeGallery extends React.Component {
     });
   }
 
+  _swipe(e, movePositions) {
+    if (this.allowSwipe) {
+      this._move(e, movePositions);
+      this.allowSwipe = false;
+      setTimeout(() => {
+        this.allowSwipe = true;
+      }, 200);
+    }
+  }
+
   render() {
     const { orientation, className } = this.props;
 
@@ -104,28 +115,28 @@ export default class SwipeGallery extends React.Component {
         onSwipingUp = {
           (e) => {
             if (orientation === SwipeGallery.VERTICAL) {
-              this._move(e, 1);
+              this._swipe(e, 1);
             }
           }
         }
         onSwipingDown = {
           (e) => {
             if (orientation === SwipeGallery.VERTICAL) {
-              this._move(e, -1);
+              this._swipe(e, -1);
             }
           }
         }
         onSwipingRight = {
           (e) => {
             if (orientation === SwipeGallery.HORIZONTAL) {
-              this._move(e, 1);
+              this._swipe(e, -1);
             }
           }
         }
         onSwipingLeft = {
           (e) => {
             if (orientation === SwipeGallery.HORIZONTAL) {
-              this._move(e, -1);
+              this._swipe(e, 1);
             }
           }
         }
