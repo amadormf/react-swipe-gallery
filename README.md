@@ -2,6 +2,8 @@
 
 Swipe gallery over React
 
+You can view an online example in [http://amadormf.github.io/react-swipe-gallery/](http://amadormf.github.io/react-swipe-gallery/)
+
 ##Install
 
 `npm install --save react-swipe-gallery`
