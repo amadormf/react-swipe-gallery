@@ -13,11 +13,16 @@ export default class SwipeGallery extends React.Component {
     orientation: PropTypes.string,
     className: PropTypes.string,
     buffer: PropTypes.bool,
+    hideArrows: PropTypes.bool,
+    hideArrowWithNoElements: PropTypes.bool,
   };
 
   static defaultProps = {
     orientation: SwipeGallery.HORIZONTAL,
+    maxElements: 1,
     buffer: false,
+    hideArrows: false,
+    hideArrowWithNoElements: true,
   };
 
   constructor(props) {
@@ -143,8 +148,19 @@ export default class SwipeGallery extends React.Component {
     }
   }
 
+
   render() {
-    const { orientation, className } = this.props;
+    const {
+      orientation,
+      className,
+      hideArrows,
+      hideArrowWithNoElements,
+      elements,
+      maxElements,
+    } = this.props;
+
+    const showArrows = !hideArrows &&
+      !(elements.length < maxElements && hideArrowWithNoElements);
 
     const swipeGalleryClasses = classNames({
       SwipeGallery: true,
@@ -194,28 +210,34 @@ export default class SwipeGallery extends React.Component {
         }
       >
         <div className = {swipeGalleryClasses} >
-          <div
-            className={arrowClassesLeft}
-            onClick={(e) => {
-              this._move(e, -1);
-            }}
-          >
-            <div>{'❮'}</div>
-          </div>
+          { showArrows &&
+            <div
+              className={arrowClassesLeft}
+              onClick={(e) => {
+                this._move(e, -1);
+              }}
+            >
+              <div>{'❮'}</div>
+            </div>
+          }
+
           <div
             className={'SwipeGallery-container'}
           >
             {this._getVisibleElements()}
 
           </div>
-          <div
-            className = {arrowClassesRight}
-            onClick={(e) => {
-              this._move(e, 1);
-            }}
-          >
-            <div>{'❯'}</div>
-          </div>
+          {
+            showArrows &&
+            <div
+              className = {arrowClassesRight}
+              onClick={(e) => {
+                this._move(e, 1);
+              }}
+            >
+              <div>{'❯'}</div>
+            </div>
+          }
         </div>
       </Swipeable>
     );

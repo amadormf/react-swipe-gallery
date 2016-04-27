@@ -29,7 +29,7 @@ const fakeEvent = {
 describe('Swipe gallery', () => {
   it('Render a component and contain the element', () => {
     const wrapper = shallow(<SwipeGallery elements={getElements(3)} />);
-    expect(wrapper.find('.subelement')).to.have.length(3);
+    expect(wrapper.find('.subelement')).to.have.length(1);
   });
 
   it('Render max elements', () => {
@@ -169,6 +169,17 @@ describe('Swipe gallery', () => {
     );
     expect(wrapper.find('.SwipeGallery--vertical')).to.have.length(1);
   });
+
+  it('Hide arrows if send prop hideArrow=true', () => {
+    const wrapper = shallow(
+      <SwipeGallery
+        elements={getElements(5)}
+        hideArrows
+      />
+    );
+    expect(wrapper.find('.SwipeGallery-next')).to.have.length(0);
+    expect(wrapper.find('.SwipeGallery-previous')).to.have.length(0);
+  });
 });
 
 describe('SwipeGallery, swipe move', () => {
@@ -234,6 +245,40 @@ describe('SwipeGallery, swipe move', () => {
       expect(onChange.callCount).to.be.equal(2);
       cb();
     }, 200);
+  });
+});
+
+describe('Diferents number of elements with buffer', () => {
+  function getWrapper(numElements, maxElements, onChange, hideArrowWithNoElements) {
+    const elements = getElements(numElements);
+    return shallow(
+      <SwipeGallery
+        elements={elements}
+        maxElements={maxElements}
+        onChangePosition={onChange}
+        buffer
+        hideArrowWithNoElements={hideArrowWithNoElements}
+      />
+    );
+  }
+
+  let onChange;
+
+  beforeEach(() => {
+    onChange = sinon.spy();
+  });
+
+  it('1 element with maxElements 3', () => {
+    const wrapper = getWrapper(1, 3, onChange);
+    expect(wrapper.find('.SwipeGallery-element--visible')).to.have.length(1);
+    expect(wrapper.find('.SwipeGallery-next')).to.have.length(0);
+    expect(wrapper.find('.SwipeGallery-previous')).to.have.length(0);
+  });
+  it('1 element with maxElements 3 and hideArrowWithNoElements=false', () => {
+    const wrapper = getWrapper(1, 3, onChange, false);
+    expect(wrapper.find('.SwipeGallery-element--visible')).to.have.length(1);
+    expect(wrapper.find('.SwipeGallery-next')).to.have.length(1);
+    expect(wrapper.find('.SwipeGallery-previous')).to.have.length(1);
   });
 });
 
