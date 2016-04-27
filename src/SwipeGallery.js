@@ -1,7 +1,6 @@
 import React, { PropTypes } from 'react';
 import Swipeable from 'react-swipeable';
 import classNames from 'classnames';
-import './styles/SwipeGallery.styl';
 
 export default class SwipeGallery extends React.Component {
   static HORIZONTAL = 'horizontal';

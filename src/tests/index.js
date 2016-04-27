@@ -2,9 +2,12 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import SwipeGallery from '../index';
-import { expect } from 'chai';
+import chai, { expect } from 'chai';
 import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 const { describe, it, before, beforeEach } = global;
+
+chai.use(sinonChai);
 
 function getElements(numElements) {
   const elements = [];
@@ -85,19 +88,19 @@ describe('Swipe gallery', () => {
 
     const buttonNext = wrapper.find('.SwipeGallery-next');
     buttonNext.simulate('click', fakeEvent);
-    expect(onChange.calledWith(1, [1, 2, 3])).to.be.true;
+    expect(onChange).to.be.calledWith(1, [1, 2, 3]);
 
     buttonNext.simulate('click', fakeEvent);
-    expect(onChange.calledWith(2, [2, 3, 4])).to.be.true;
+    expect(onChange).to.be.calledWith(2, [2, 3, 4]);
 
     buttonNext.simulate('click', fakeEvent);
-    expect(onChange.calledWith(3, [3, 4, 0])).to.be.true;
+    expect(onChange).to.be.calledWith(3, [3, 4, 0]);
 
     buttonNext.simulate('click', fakeEvent);
-    expect(onChange.calledWith(4, [4, 0, 1])).to.be.true;
+    expect(onChange).to.be.calledWith(4, [4, 0, 1]);
 
     buttonNext.simulate('click', fakeEvent);
-    expect(onChange.calledWith(0, [0, 1, 2])).to.be.true;
+    expect(onChange).to.be.calledWith(0, [0, 1, 2]);
   });
 
   it('Check if click in previous button many times get the correct positiion', () => {
@@ -116,19 +119,19 @@ describe('Swipe gallery', () => {
     const buttonPrevious = wrapper.find('.SwipeGallery-previous');
 
     buttonPrevious.simulate('click', fakeEvent);
-    expect(onChange.calledWith(4, [4, 0, 1])).to.be.true;
+    expect(onChange).to.be.calledWith(4, [4, 0, 1]);
 
     buttonPrevious.simulate('click', fakeEvent);
-    expect(onChange.calledWith(3, [3, 4, 0])).to.be.true;
+    expect(onChange).to.be.calledWith(3, [3, 4, 0]);
 
     buttonPrevious.simulate('click', fakeEvent);
-    expect(onChange.calledWith(2, [2, 3, 4])).to.be.true;
+    expect(onChange).to.be.calledWith(2, [2, 3, 4]);
 
     buttonPrevious.simulate('click', fakeEvent);
-    expect(onChange.calledWith(1, [1, 2, 3])).to.be.true;
+    expect(onChange).to.be.calledWith(1, [1, 2, 3]);
 
     buttonPrevious.simulate('click', fakeEvent);
-    expect(onChange.calledWith(0, [0, 1, 2])).to.be.true;
+    expect(onChange).to.be.calledWith(0, [0, 1, 2]);
   });
 
   it('Check if on click in previous button go to the last element', () => {
@@ -143,8 +146,8 @@ describe('Swipe gallery', () => {
       />
     );
     wrapper.find('.SwipeGallery-previous').simulate('click', fakeEvent);
-    expect(onChange.callCount).to.be.equal(1);
-    expect(onChange.calledWith(numElements - 1)).to.be.true;
+    expect(onChange).to.be.callCount(1);
+    expect(onChange).to.be.calledWith(numElements - 1);
   });
 
   it('Check if send a custom class, this is used', () => {

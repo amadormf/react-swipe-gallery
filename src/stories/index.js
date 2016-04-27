@@ -1,6 +1,7 @@
 import React from 'react';
 import { storiesOf } from '@kadira/storybook';
-import SwipeGallery from '../index';
+import SwipeGallery from '../../lib/index';
+import '../styles/SwipeGallery.styl';
 
 function getElements(numElements) {
   const elements = [];
