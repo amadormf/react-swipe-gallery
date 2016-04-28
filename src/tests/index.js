@@ -213,7 +213,7 @@ describe('SwipeGallery, swipe move', () => {
         buffer = {buffer}
       />
     );
-  };
+  }
 
   beforeEach(() => {
     onChange = sinon.spy();
@@ -259,8 +259,8 @@ describe('SwipeGallery, swipe move', () => {
       const start = 400;
       wrapper.simulate('touchStart', getFakeEventMoveSwipe(start, start));
       wrapper.simulate('touchMove', getFakeEventMoveSwipe(start + x, start + y));
-      const elements = wrapper.find('.SwipeGallery-element');
-      for (const element of elements.nodes) {
+      const subElements = wrapper.find('.SwipeGallery-element');
+      for (const element of subElements.nodes) {
         if (x) {
           expect(element.style.left).to.have.equal(`${x}px`);
         } else {
@@ -268,7 +268,7 @@ describe('SwipeGallery, swipe move', () => {
         }
       }
       wrapper.simulate('touchEnd', getFakeEventMoveSwipe(start + x + x, start + y + y));
-      for (const element of elements.nodes) {
+      for (const element of subElements.nodes) {
         if (x > 0) {
           expect(element.style.left).to.have.equal('');
         } else {
@@ -276,7 +276,7 @@ describe('SwipeGallery, swipe move', () => {
         }
       }
     }
-    
+
     it('Simulate left swipe, change position of elements', () => {
       loadWrapper();
       simulateMovementAndExpectMove(-50, 0);
