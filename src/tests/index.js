@@ -9,12 +9,14 @@ const { describe, it, before, beforeEach, context } = global;
 
 chai.use(sinonChai);
 
+const SIZE_ELEMENT = 200;
+
 function getElements(numElements) {
   const elements = [];
   for (let i = 0; i < numElements; ++i) {
     elements.push(
       <div className="subelement" key={i}>
-        { i }
+        <span>{ i }</span>
       </div>
     );
   }
@@ -54,6 +56,31 @@ describe('Swipe gallery', () => {
       />
     );
     expect(wrapper.find('.subelement')).to.have.length(3);
+  });
+
+  it('Render elements.length < maxElements and show all elements', () => {
+    const elements = getElements(2);
+    const wrapper = shallow(
+      <SwipeGallery
+        elements={elements}
+        maxElements={3}
+      />
+    );
+    expect(wrapper.find('.SwipeGallery-element--visible')).to.have.length(2);
+    expect(wrapper.find('.SwipeGallery-element--invisible')).to.have.length(0);
+  });
+
+  it('With buffer render elements.length < maxElements and show all elements', () => {
+    const elements = getElements(2);
+    const wrapper = shallow(
+      <SwipeGallery
+        elements={elements}
+        maxElements={3}
+        buffer
+      />
+    );
+    expect(wrapper.find('.SwipeGallery-element--visible')).to.have.length(2);
+    expect(wrapper.find('.SwipeGallery-element--invisible')).to.have.length(0);
   });
 
   it('Show next button and previous button', () => {
@@ -199,10 +226,6 @@ describe('SwipeGallery, swipe move', () => {
   let onChange;
   let wrapper;
 
-  before(() => {
-    elements = getElements(5);
-  });
-
   function loadWrapper(orientation = SwipeGallery.HORIZONTAL, buffer = false) {
     wrapper = mount(
       <SwipeGallery
@@ -213,20 +236,30 @@ describe('SwipeGallery, swipe move', () => {
         buffer = {buffer}
       />
     );
+
+    const nodes = wrapper.find('.SwipeGallery-element').nodes;
+
+    for (let i = 0; i < nodes.length; ++i) {
+      nodes[i].offsetWidth = SIZE_ELEMENT;
+      nodes[i].offsetHeight = SIZE_ELEMENT;
+    }
+  }
+
+  function simulateMovement(x, y) {
+    const start = 400;
+    wrapper.simulate('touchStart', getFakeEventMoveSwipe(start, start));
+    wrapper.simulate('touchMove', getFakeEventMoveSwipe(start + x, start + y));
+    wrapper.simulate('touchEnd', getFakeEventMoveSwipe(start + x + x, start + y + y));
   }
 
   beforeEach(() => {
     onChange = sinon.spy();
   });
 
-
   context('Without buffer: ', () => {
-    function simulateMovement(x, y) {
-      const start = 400;
-      wrapper.simulate('touchStart', getFakeEventMoveSwipe(start, start));
-      wrapper.simulate('touchMove', getFakeEventMoveSwipe(start + x, start + y));
-      wrapper.simulate('touchEnd', getFakeEventMoveSwipe(start + x + x, start + y + y));
-    }
+    before(() => {
+      elements = getElements(5);
+    });
     it('Simulate left swipe, change position of elements', () => {
       loadWrapper();
       simulateMovement(-50, 0);
@@ -254,19 +287,16 @@ describe('SwipeGallery, swipe move', () => {
     });
   });
 
-  context('With buffer', () => {
+  context('With buffer: ', () => {
+    before(() => {
+      elements = getElements(5);
+    });
+
     function simulateMovementAndExpectMove(x, y) {
       const start = 400;
       wrapper.simulate('touchStart', getFakeEventMoveSwipe(start, start));
       wrapper.simulate('touchMove', getFakeEventMoveSwipe(start + x, start + y));
       const subElements = wrapper.find('.SwipeGallery-element');
-      for (const element of subElements.nodes) {
-        if (x) {
-          expect(element.style.left).to.have.equal(`${x}px`);
-        } else {
-          expect(element.style.top).to.have.equal(`${y}px`);
-        }
-      }
       wrapper.simulate('touchEnd', getFakeEventMoveSwipe(start + x + x, start + y + y));
       for (const element of subElements.nodes) {
         if (x > 0) {
@@ -278,28 +308,50 @@ describe('SwipeGallery, swipe move', () => {
     }
 
     it('Simulate left swipe, change position of elements', () => {
-      loadWrapper();
+      loadWrapper(SwipeGallery.HORIZONTAL, true);
       simulateMovementAndExpectMove(-50, 0);
       expect(onChange).to.be.callCount(1);
       expect(onChange).to.be.calledWith(1, [1, 2, 3]);
     });
     it('Simulate right swipe, change position of elements', () => {
-      loadWrapper();
+      loadWrapper(SwipeGallery.HORIZONTAL, true);
       simulateMovementAndExpectMove(50, 0);
       expect(onChange).to.be.callCount(1);
       expect(onChange).to.be.calledWith(4, [4, 0, 1]);
     });
     it('Simulate up swipe, change position of elements', () => {
-      loadWrapper(SwipeGallery.VERTICAL);
+      loadWrapper(SwipeGallery.VERTICAL, true);
       simulateMovementAndExpectMove(0, -50);
       expect(onChange).to.be.callCount(1);
       expect(onChange).to.be.calledWith(1, [1, 2, 3]);
     });
     it('Simulate down swipe, change position of elements', () => {
-      loadWrapper(SwipeGallery.VERTICAL);
+      loadWrapper(SwipeGallery.VERTICAL, true);
       simulateMovementAndExpectMove(0, 50);
       expect(onChange).to.be.callCount(1);
       expect(onChange).to.be.calledWith(4, [4, 0, 1]);
+    });
+  });
+
+  context('Dont\'t allow swipe', () => {
+    it('with elements.length < maxElements', () => {
+      elements = getElements(2);
+      loadWrapper();
+      simulateMovement(50, 0);
+      expect(onChange).to.be.callCount(0);
+    });
+    it('with prop disableSwipe=true', () => {
+      elements = getElements(5);
+      wrapper = mount(
+        <SwipeGallery
+          elements = {elements}
+          maxElements={3}
+          onChangePosition={onChange}
+          disableSwipe
+        />
+      );
+      simulateMovement(50, 0);
+      expect(onChange).to.be.callCount(0);
     });
   });
 });

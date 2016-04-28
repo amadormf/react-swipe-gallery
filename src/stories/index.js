@@ -57,4 +57,12 @@ storiesOf('Button', module)
       buffer
     />
   ))
+  .add('horizontal with buffer but only two elements', () => (
+    <SwipeGallery
+      elements={ getElements(2) }
+      maxElements={3}
+      customStyles={styles}
+      buffer
+    />
+  ))
 ;

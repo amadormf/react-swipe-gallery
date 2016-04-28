@@ -18,6 +18,7 @@ export default class SwipeGallery extends React.Component {
     hideArrows: PropTypes.bool,
     hideArrowWithNoElements: PropTypes.bool,
     customStyles: PropTypes.string,
+    disableSwipe: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -26,6 +27,7 @@ export default class SwipeGallery extends React.Component {
     buffer: false,
     hideArrows: false,
     hideArrowWithNoElements: true,
+    disableSwipe: false,
   };
 
   constructor(props) {
@@ -70,12 +72,18 @@ export default class SwipeGallery extends React.Component {
 
   _getVisibleElements() {
     const elements = [];
-    if (this.props.buffer) {
+
+    for (const position of this.state.visiblePositions) {
+      elements.push(this._wrapElement(true, this.props.elements[position], null, position));
+    }
+
+    if (this.props.buffer && this.props.elements.length > this.props.maxElements) {
       let firstPosition = this.state.visiblePositions[0] - 1;
       if (firstPosition < 0) {
         firstPosition = this.props.elements.length - 1;
       }
-      elements.push(
+
+      elements.unshift(
         this._wrapElement(
           false,
           this.props.elements[firstPosition],
@@ -83,14 +91,7 @@ export default class SwipeGallery extends React.Component {
           firstPosition
         )
       );
-    }
 
-
-    for (const position of this.state.visiblePositions) {
-      elements.push(this._wrapElement(true, this.props.elements[position], null, position));
-    }
-
-    if (this.props.buffer) {
       let lastPosition = this.state.visiblePositions[this.state.visiblePositions.length - 1] + 1;
       if (lastPosition >= this.props.elements.length) {
         lastPosition = 0;
@@ -159,13 +160,23 @@ export default class SwipeGallery extends React.Component {
     });
   }
 
+  _isSwipeDisabled() {
+    return (this.props.disableSwipe || this.props.elements.length < this.props.maxElements);
+  }
+
   _handleTouchStart(e) {
+    if (this.props.disableSwipe) {
+      return;
+    }
     this.finishSwipe = false;
     this.movement.touchX = e.changedTouches[0].clientX;
     this.movement.touchY = e.changedTouches[0].clientY;
   }
 
   _handleTouchMove(e) {
+    if (this._isSwipeDisabled()) {
+      return;
+    }
     if (!this.finishSwipe) {
       this.movement = this._calculateMove(e);
       this._moveSwipe(e);
@@ -173,37 +184,47 @@ export default class SwipeGallery extends React.Component {
   }
 
   _handleTouchEnd(e) {
+    if (this._isSwipeDisabled()) {
+      return;
+    }
     if (!this.finishSwipe) {
       this._finishSwipe(e);
     }
   }
 
   _finishSwipe(e) {
+    if (this._isSwipeDisabled()) {
+      return;
+    }
     this.finishSwipe = true;
     let movePosition = 0;
 
     const moved = this.props.orientation === SwipeGallery.HORIZONTAL
                     ? this.movement.accumulatorX
                     : this.movement.accumulatorY;
-    if (moved > 0) {
-      movePosition = SwipeGallery.NEXT;
-    } else if (moved < 0) {
-      movePosition = SwipeGallery.PREVIOUS;
-    }
+    if (this.props.elements.length > this.props.maxElements) {
+      if (moved < 0) {
+        movePosition = SwipeGallery.NEXT;
+      } else if (moved > 0) {
+        movePosition = SwipeGallery.PREVIOUS;
+      }
 
-    if (movePosition) {
-      this._move(e, movePosition);
+      if (movePosition) {
+        this._move(e, movePosition);
+      }
+      this._resetMove();
+      this._resetPosition();
     }
-    this._resetMove();
-    this._resetPosition();
   }
 
   _resetPosition() {
-    const nodes = this.refs.swipeGalleryContainer.childNodes;
+    const nodes = this.refs.container.childNodes;
     const lastIndex = nodes.length - 1;
     for (let i = 0; i <= lastIndex; ++i) {
       nodes[i].style.top = '';
       nodes[i].style.left = '';
+      nodes[i].style.right = '';
+      nodes[i].style.bottom = '';
       nodes[i].style.transform = '';
       nodes[i].style.position = '';
       nodes[i].style.opacity = '';
@@ -211,49 +232,67 @@ export default class SwipeGallery extends React.Component {
   }
 
   _moveSwipe(e) {
-    const nodes = this.refs.swipeGalleryContainer.childNodes;
+    const nodes = this.refs.container.childNodes;
 
     const quantityToMove = this.props.orientation === SwipeGallery.HORIZONTAL
                             ? this.movement.accumulatorX
                             : this.movement.accumulatorY;
-    const pxToMove = `${-quantityToMove}px`;
+
+    const newElementToView = quantityToMove > 0
+      ? nodes[0]
+      : nodes[nodes.length - 1];
+
+    const newElementSize = this.props.orientation === SwipeGallery.HORIZONTAL
+      ? newElementToView.offsetWidth
+      : newElementToView.offsetHeight;
+
+    if (this.props.buffer) {
+      newElementToView.style.transform = 'initial';
+      newElementToView.style.opacity =
+        Math.abs(quantityToMove / newElementSize);
+    }
+
+    const pxToMove = `${quantityToMove}px`;
     const lastIndex = nodes.length - 1;
     for (let i = 0; i <= lastIndex; ++i) {
       if (this.props.orientation === SwipeGallery.HORIZONTAL) {
-        nodes[i].style.left = pxToMove;
+        if (nodes[i] === newElementToView) {
+          if (i === 0) {
+            nodes[i].style.left = `${(-newElementSize + quantityToMove)}px`;
+          } else {
+            nodes[i].style.right = `${-(newElementSize + quantityToMove)}px`;
+            nodes[i].style.left = '';
+          }
+        } else {
+          nodes[i].style.left = pxToMove;
+        }
       } else {
-        nodes[i].style.top = pxToMove;
+        if (nodes[i] === newElementToView) {
+          if (i === 0) {
+            nodes[i].style.top = `${(-newElementSize + quantityToMove)}px`;
+          } else {
+            nodes[i].style.bottom = `${-(newElementSize + quantityToMove)}px`;
+            nodes[i].style.top = '';
+          }
+        } else {
+          nodes[i].style.top = pxToMove;
+        }
       }
     }
 
     if (this.props.buffer) {
-      nodes[lastIndex].style.transform = 'initial';
-      nodes[lastIndex].style.position = 'relative';
-
-      const moved = this.props.orientation === SwipeGallery.HORIZONTAL
-        ? this.movement.accumulatorX
-        : this.movement.accumulatorY;
-
-      const newElementToView = moved < 0
-                                  ? nodes[0]
-                                  : nodes[nodes.length - 1];
-
-      const widthLastElement = newElementToView.offsetWidth;
-      newElementToView.style.opacity =
-        Math.abs(moved / widthLastElement);
-      if (widthLastElement < Math.abs(this.movement.accumulatorX)) {
+      if (newElementSize < Math.abs(quantityToMove)) {
         this._finishSwipe(e);
       }
-    } else {
-      nodes[nodes.length - 1].style.left = pxToMove;
     }
   }
+
 
   _calculateMove(e) {
     const touchX = e.changedTouches[0].clientX;
     const touchY = e.changedTouches[0].clientY;
-    const moveX = this.movement.touchX - touchX;
-    const moveY = this.movement.touchY - touchY;
+    const moveX = touchX - this.movement.touchX;
+    const moveY = touchY - this.movement.touchY;
     const accumulatorX = this.movement.accumulatorX + moveX;
     const accumulatorY = this.movement.accumulatorY + moveY;
 
@@ -316,7 +355,7 @@ export default class SwipeGallery extends React.Component {
           </div>
         }
         <div
-          ref="swipeGalleryContainer"
+          ref="container"
           className={'SwipeGallery-container'}
         >
           {this._getVisibleElements()}

@@ -47,4 +47,5 @@ const gallery = (
 |buffer     |Bool          |  true    |if is true add a buffer for quickly transition|
 |hideArrow  |Bool          |  false   |If is true don't show the arrows|
 |hideArrowWithNoElements|Bool       |true   |If is true and maxElements > elements.length don't show the arrows|
- 
+|customStyles|String       |          |Add inline styles to component|
+|disableSwipe|Bool         |  false   |Disable swipe event |   
