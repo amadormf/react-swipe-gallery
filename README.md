@@ -48,4 +48,5 @@ const gallery = (
 |hideArrow  |Bool          |  false   |If is true don't show the arrows|
 |hideArrowWithNoElements|Bool       |true   |If is true and maxElements > elements.length don't show the arrows|
 |customStyles|String       |          |Add inline styles to component|
-|disableSwipe|Bool         |  false   |Disable swipe event |   
+|disableSwipe|Bool         |  false   |Disable swipe event | 
+|stopPropagation| Bool     |  false   |If is true, call a stopPropagation on touch events'| 

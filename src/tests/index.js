@@ -23,11 +23,6 @@ function getElements(numElements) {
   return elements;
 }
 
-const fakeEvent = {
-  preventDefault: () => undefined,
-  stopPropagation: () => undefined,
-};
-
 function getFakeEventMoveSwipe(x, y) {
   return {
     changedTouches: [
@@ -39,6 +34,17 @@ function getFakeEventMoveSwipe(x, y) {
   };
 }
 
+function simulateMovement(x, y, wrapper) {
+  const start = 400;
+  wrapper.simulate('touchStart', getFakeEventMoveSwipe(start, start));
+  wrapper.simulate('touchMove', getFakeEventMoveSwipe(start + x, start + y));
+  wrapper.simulate('touchEnd', getFakeEventMoveSwipe(start + x + x, start + y + y));
+}
+
+const fakeEvent = {
+  preventDefault: () => undefined,
+  stopPropagation: () => undefined,
+};
 
 describe('Swipe gallery', () => {
   it('Render a component and contain the element', () => {
@@ -245,13 +251,6 @@ describe('SwipeGallery, swipe move', () => {
     }
   }
 
-  function simulateMovement(x, y) {
-    const start = 400;
-    wrapper.simulate('touchStart', getFakeEventMoveSwipe(start, start));
-    wrapper.simulate('touchMove', getFakeEventMoveSwipe(start + x, start + y));
-    wrapper.simulate('touchEnd', getFakeEventMoveSwipe(start + x + x, start + y + y));
-  }
-
   beforeEach(() => {
     onChange = sinon.spy();
   });
@@ -262,26 +261,26 @@ describe('SwipeGallery, swipe move', () => {
     });
     it('Simulate left swipe, change position of elements', () => {
       loadWrapper();
-      simulateMovement(-50, 0);
+      simulateMovement(-50, 0, wrapper);
       expect(onChange).to.be.callCount(1);
       expect(onChange).to.be.calledWith(1, [1, 2, 3]);
     });
 
     it('Simulate right swipe, change position of elements', () => {
       loadWrapper();
-      simulateMovement(50, 0);
+      simulateMovement(50, 0, wrapper);
       expect(onChange).to.be.callCount(1);
       expect(onChange).to.be.calledWith(4, [4, 0, 1]);
     });
     it('Simulate up swipe, change position of elements', () => {
       loadWrapper(SwipeGallery.VERTICAL);
-      simulateMovement(0, -50);
+      simulateMovement(0, -50, wrapper);
       expect(onChange).to.be.callCount(1);
       expect(onChange).to.be.calledWith(1, [1, 2, 3]);
     });
     it('Simulate down swipe, change position of elements', () => {
       loadWrapper(SwipeGallery.VERTICAL);
-      simulateMovement(0, 50);
+      simulateMovement(0, 50, wrapper);
       expect(onChange).to.be.callCount(1);
       expect(onChange).to.be.calledWith(4, [4, 0, 1]);
     });
@@ -337,7 +336,7 @@ describe('SwipeGallery, swipe move', () => {
     it('with elements.length < maxElements', () => {
       elements = getElements(2);
       loadWrapper();
-      simulateMovement(50, 0);
+      simulateMovement(50, 0, wrapper);
       expect(onChange).to.be.callCount(0);
     });
     it('with prop disableSwipe=true', () => {
@@ -350,7 +349,7 @@ describe('SwipeGallery, swipe move', () => {
           disableSwipe
         />
       );
-      simulateMovement(50, 0);
+      simulateMovement(50, 0, wrapper);
       expect(onChange).to.be.callCount(0);
     });
   });
@@ -416,5 +415,25 @@ describe('Swipe gallery with prop buffer=true', () => {
     expect(wrapper.find('.subelement')).to.have.length(5);
     expect(wrapper.find('.SwipeGallery-element--visible')).to.have.length(3);
     expect(wrapper.find('.SwipeGallery-element--invisible')).to.have.length(2);
+  });
+});
+
+describe('stopPropagation parameter', () => {
+  it('If is true don\'t propagate the touchEvent', () => {
+    let onTouch = sinon.spy();
+    const wrapper = mount(
+      <div
+        onTouchStart={onTouch}
+        onTouchMove={onTouch}
+        onTouchEnd={onTouch}
+      >
+        <SwipeGallery
+          elements={getElements(5)}
+          stopPropagation
+        />
+      </div>
+    );
+    simulateMovement(50, 0, wrapper.find('.SwipeGallery'));
+    expect(onTouch).to.have.callCount(0);
   });
 });

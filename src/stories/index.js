@@ -25,6 +25,7 @@ const styles = {
   width: '90vw',
   margin: '0 auto',
 };
+
 storiesOf('Button', module)
   .add('default view', () => (
     <SwipeGallery

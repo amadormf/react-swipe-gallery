@@ -19,6 +19,7 @@ export default class SwipeGallery extends React.Component {
     hideArrowWithNoElements: PropTypes.bool,
     customStyles: PropTypes.string,
     disableSwipe: PropTypes.bool,
+    stopPropagation: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -168,6 +169,11 @@ export default class SwipeGallery extends React.Component {
     if (this.props.disableSwipe) {
       return;
     }
+
+    if (this.props.stopPropagation) {
+      e.stopPropagation();
+    }
+
     this.finishSwipe = false;
     this.movement.touchX = e.changedTouches[0].clientX;
     this.movement.touchY = e.changedTouches[0].clientY;
@@ -177,6 +183,11 @@ export default class SwipeGallery extends React.Component {
     if (this._isSwipeDisabled()) {
       return;
     }
+
+    if (this.props.stopPropagation) {
+      e.stopPropagation();
+    }
+
     if (!this.finishSwipe) {
       this.movement = this._calculateMove(e);
       this._moveSwipe(e);
@@ -187,6 +198,11 @@ export default class SwipeGallery extends React.Component {
     if (this._isSwipeDisabled()) {
       return;
     }
+
+    if (this.props.stopPropagation) {
+      e.stopPropagation();
+    }
+
     if (!this.finishSwipe) {
       this._finishSwipe(e);
     }
