@@ -1,10 +1,12 @@
 import React, { PropTypes } from 'react';
-import Swipeable from 'react-swipeable';
 import classNames from 'classnames';
 
 export default class SwipeGallery extends React.Component {
   static HORIZONTAL = 'horizontal';
   static VERTICAL = 'vertical';
+
+  static NEXT = 1;
+  static PREVIOUS = -1;
 
   static propTypes = {
     elements: PropTypes.array.isRequired,
@@ -15,6 +17,7 @@ export default class SwipeGallery extends React.Component {
     buffer: PropTypes.bool,
     hideArrows: PropTypes.bool,
     hideArrowWithNoElements: PropTypes.bool,
+    customStyles: PropTypes.string,
   };
 
   static defaultProps = {
@@ -31,11 +34,23 @@ export default class SwipeGallery extends React.Component {
     this.state = {
       actualPosition: 0,
       visiblePositions: this._getVisiblePositions(0),
+      swiping: false,
+    };
+    this._resetMove();
+  }
+
+  _resetMove() {
+    this.movement = {
+      moveX: 0,
+      moveY: 0,
+      accumulatorX: 0,
+      accumulatorY: 0,
     };
   }
 
   _wrapElement(visible, element, position, index) {
     const classWrap = classNames({
+      'SwipeGallery-element': true,
       'SwipeGallery-element--visible': visible,
       'SwipeGallery-element--invisible': !visible,
       'SwipeGallery-element--left': position === 'left',
@@ -44,7 +59,10 @@ export default class SwipeGallery extends React.Component {
       'SwipeGallery-element--bottom': position === 'bottom',
     });
     return (
-      <div className={classWrap} key={index}>
+      <div
+        className={classWrap}
+        key={index}
+      >
         {element}
       </div>
     );
@@ -133,21 +151,121 @@ export default class SwipeGallery extends React.Component {
       visiblePositions: this._getVisiblePositions(position),
     }, () => {
       if (typeof this.props.onChangePosition === 'function') {
-        this.props.onChangePosition(this.state.actualPosition, this.state.visiblePositions);
+        this.props.onChangePosition(
+          this.state.actualPosition,
+          this.state.visiblePositions
+        );
       }
     });
   }
 
-  _swipe(e, movePositions) {
-    if (this.allowSwipe) {
-      this._move(e, movePositions);
-      this.allowSwipe = false;
-      setTimeout(() => {
-        this.allowSwipe = true;
-      }, 200);
+  _handleTouchStart(e) {
+    this.finishSwipe = false;
+    this.movement.touchX = e.changedTouches[0].clientX;
+    this.movement.touchY = e.changedTouches[0].clientY;
+  }
+
+  _handleTouchMove(e) {
+    if (!this.finishSwipe) {
+      this.movement = this._calculateMove(e);
+      this._moveSwipe(e);
     }
   }
 
+  _handleTouchEnd(e) {
+    if (!this.finishSwipe) {
+      this._finishSwipe(e);
+    }
+  }
+
+  _finishSwipe(e) {
+    this.finishSwipe = true;
+    let movePosition = 0;
+
+    const moved = this.props.orientation === SwipeGallery.HORIZONTAL
+                    ? this.movement.accumulatorX
+                    : this.movement.accumulatorY;
+    if (moved > 0) {
+      movePosition = SwipeGallery.NEXT;
+    } else if (moved < 0) {
+      movePosition = SwipeGallery.PREVIOUS;
+    }
+
+    if (movePosition) {
+      this._move(e, movePosition);
+    }
+    this._resetMove();
+    this._resetPosition();
+  }
+
+  _resetPosition() {
+    const nodes = this.refs.swipeGalleryContainer.childNodes;
+    const lastIndex = nodes.length - 1;
+    for (let i = 0; i <= lastIndex; ++i) {
+      nodes[i].style.top = '';
+      nodes[i].style.left = '';
+      nodes[i].style.transform = '';
+      nodes[i].style.position = '';
+      nodes[i].style.opacity = '';
+    }
+  }
+
+  _moveSwipe(e) {
+    const nodes = this.refs.swipeGalleryContainer.childNodes;
+
+    const quantityToMove = this.props.orientation === SwipeGallery.HORIZONTAL
+                            ? this.movement.accumulatorX
+                            : this.movement.accumulatorY;
+    const pxToMove = `${-quantityToMove}px`;
+    const lastIndex = nodes.length - 1;
+    for (let i = 0; i <= lastIndex; ++i) {
+      if (this.props.orientation === SwipeGallery.HORIZONTAL) {
+        nodes[i].style.left = pxToMove;
+      } else {
+        nodes[i].style.top = pxToMove;
+      }
+    }
+
+    if (this.props.buffer) {
+      nodes[lastIndex].style.transform = 'initial';
+      nodes[lastIndex].style.position = 'relative';
+
+      const moved = this.props.orientation === SwipeGallery.HORIZONTAL
+        ? this.movement.accumulatorX
+        : this.movement.accumulatorY;
+
+      const newElementToView = moved < 0
+                                  ? nodes[0]
+                                  : nodes[nodes.length - 1];
+
+      const widthLastElement = newElementToView.offsetWidth;
+      newElementToView.style.opacity =
+        Math.abs(moved / widthLastElement);
+      if (widthLastElement < Math.abs(this.movement.accumulatorX)) {
+        this._finishSwipe(e);
+      }
+    } else {
+      nodes[nodes.length - 1].style.left = pxToMove;
+    }
+  }
+
+  _calculateMove(e) {
+    const touchX = e.changedTouches[0].clientX;
+    const touchY = e.changedTouches[0].clientY;
+    const moveX = this.movement.touchX - touchX;
+    const moveY = this.movement.touchY - touchY;
+    const accumulatorX = this.movement.accumulatorX + moveX;
+    const accumulatorY = this.movement.accumulatorY + moveY;
+
+    return {
+      touchX,
+      touchY,
+      moveX,
+      moveY,
+      accumulatorX,
+      accumulatorY,
+    };
+  }
 
   render() {
     const {
@@ -157,6 +275,7 @@ export default class SwipeGallery extends React.Component {
       hideArrowWithNoElements,
       elements,
       maxElements,
+      customStyles,
     } = this.props;
 
     const showArrows = !hideArrows &&
@@ -179,67 +298,42 @@ export default class SwipeGallery extends React.Component {
     });
 
     return (
-      <Swipeable
-        onSwipingUp = {
-          (e) => {
-            if (orientation === SwipeGallery.VERTICAL) {
-              this._swipe(e, 1);
-            }
-          }
-        }
-        onSwipingDown = {
-          (e) => {
-            if (orientation === SwipeGallery.VERTICAL) {
-              this._swipe(e, -1);
-            }
-          }
-        }
-        onSwipingRight = {
-          (e) => {
-            if (orientation === SwipeGallery.HORIZONTAL) {
-              this._swipe(e, -1);
-            }
-          }
-        }
-        onSwipingLeft = {
-          (e) => {
-            if (orientation === SwipeGallery.HORIZONTAL) {
-              this._swipe(e, 1);
-            }
-          }
-        }
+      <div
+        className = {swipeGalleryClasses}
+        onTouchStart={(e) => this._handleTouchStart(e)}
+        onTouchMove={(e) => this._handleTouchMove(e)}
+        onTouchEnd={(e) => this._handleTouchEnd(e)}
+        style={customStyles}
       >
-        <div className = {swipeGalleryClasses} >
-          { showArrows &&
-            <div
-              className={arrowClassesLeft}
-              onClick={(e) => {
-                this._move(e, -1);
-              }}
-            >
-              <div>{'❮'}</div>
-            </div>
-          }
-
+        { showArrows &&
           <div
-            className={'SwipeGallery-container'}
+            className={arrowClassesLeft}
+            onClick={(e) => {
+              this._move(e, -1);
+            }}
           >
-            {this._getVisibleElements()}
-
+            <div>{'❮'}</div>
           </div>
-          {
-            showArrows &&
-            <div
-              className = {arrowClassesRight}
-              onClick={(e) => {
-                this._move(e, 1);
-              }}
-            >
-              <div>{'❯'}</div>
-            </div>
-          }
+        }
+        <div
+          ref="swipeGalleryContainer"
+          className={'SwipeGallery-container'}
+        >
+          {this._getVisibleElements()}
+
         </div>
-      </Swipeable>
+        {
+          showArrows &&
+          <div
+            className = {arrowClassesRight}
+            onClick={(e) => {
+              this._move(e, 1);
+            }}
+          >
+            <div>{'❯'}</div>
+          </div>
+        }
+      </div>
     );
   }
 }

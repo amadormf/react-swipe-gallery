@@ -1,11 +1,11 @@
 /* eslint-disable no-unused-expressions */
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import SwipeGallery from '../index';
 import chai, { expect } from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-const { describe, it, before, beforeEach } = global;
+const { describe, it, before, beforeEach, context } = global;
 
 chai.use(sinonChai);
 
@@ -25,6 +25,18 @@ const fakeEvent = {
   preventDefault: () => undefined,
   stopPropagation: () => undefined,
 };
+
+function getFakeEventMoveSwipe(x, y) {
+  return {
+    changedTouches: [
+      {
+        clientX: x,
+        clientY: y,
+      },
+    ],
+  };
+}
+
 
 describe('Swipe gallery', () => {
   it('Render a component and contain the element', () => {
@@ -184,67 +196,111 @@ describe('Swipe gallery', () => {
 
 describe('SwipeGallery, swipe move', () => {
   let elements;
-  let wrapper;
   let onChange;
+  let wrapper;
 
   before(() => {
     elements = getElements(5);
   });
 
-  beforeEach(() => {
-    onChange = sinon.spy();
-    wrapper = shallow(
+  function loadWrapper(orientation = SwipeGallery.HORIZONTAL, buffer = false) {
+    wrapper = mount(
       <SwipeGallery
         elements={elements}
         maxElements={3}
         onChangePosition={onChange}
+        orientation={orientation}
+        buffer = {buffer}
       />
     );
+  };
+
+  beforeEach(() => {
+    onChange = sinon.spy();
   });
 
-  it('Check swipe left move', () => {
-    wrapper.prop('onSwipingLeft')(fakeEvent);
-    expect(onChange.callCount).to.be.equal(1);
-    expect(onChange.calledWith(1, [1, 2, 3])).to.be.true;
+
+  context('Without buffer: ', () => {
+    function simulateMovement(x, y) {
+      const start = 400;
+      wrapper.simulate('touchStart', getFakeEventMoveSwipe(start, start));
+      wrapper.simulate('touchMove', getFakeEventMoveSwipe(start + x, start + y));
+      wrapper.simulate('touchEnd', getFakeEventMoveSwipe(start + x + x, start + y + y));
+    }
+    it('Simulate left swipe, change position of elements', () => {
+      loadWrapper();
+      simulateMovement(-50, 0);
+      expect(onChange).to.be.callCount(1);
+      expect(onChange).to.be.calledWith(1, [1, 2, 3]);
+    });
+
+    it('Simulate right swipe, change position of elements', () => {
+      loadWrapper();
+      simulateMovement(50, 0);
+      expect(onChange).to.be.callCount(1);
+      expect(onChange).to.be.calledWith(4, [4, 0, 1]);
+    });
+    it('Simulate up swipe, change position of elements', () => {
+      loadWrapper(SwipeGallery.VERTICAL);
+      simulateMovement(0, -50);
+      expect(onChange).to.be.callCount(1);
+      expect(onChange).to.be.calledWith(1, [1, 2, 3]);
+    });
+    it('Simulate down swipe, change position of elements', () => {
+      loadWrapper(SwipeGallery.VERTICAL);
+      simulateMovement(0, 50);
+      expect(onChange).to.be.callCount(1);
+      expect(onChange).to.be.calledWith(4, [4, 0, 1]);
+    });
   });
 
-  it('Check swipe right move', () => {
-    wrapper.prop('onSwipingRight')(fakeEvent);
-    expect(onChange.callCount).to.be.equal(1);
-    expect(onChange.calledWith(4, [4, 0, 1])).to.be.true;
-  });
-
-  it('Check swipe up move', () => {
-    wrapper.setProps({ orientation: SwipeGallery.VERTICAL });
-    wrapper.update();
-    wrapper.prop('onSwipingUp')(fakeEvent);
-    expect(onChange.callCount).to.be.equal(1);
-    expect(onChange.calledWith(1, [1, 2, 3])).to.be.true;
-  });
-
-  it('Check swipe up move', () => {
-    wrapper.setProps({ orientation: SwipeGallery.VERTICAL });
-    wrapper.update();
-    wrapper.prop('onSwipingDown')(fakeEvent);
-    expect(onChange.callCount).to.be.equal(1);
-    expect(onChange.calledWith(4, [4, 0, 1])).to.be.true;
-  });
-
-  it('Check swipe don\'t allow quickly move', () => {
-    wrapper.prop('onSwipingRight')(fakeEvent);
-    expect(onChange.callCount).to.be.equal(1);
-    wrapper.prop('onSwipingRight')(fakeEvent);
-    expect(onChange.callCount).to.be.equal(1);
-  });
-
-  it('Check swipe move with timeout', (cb) => {
-    wrapper.prop('onSwipingRight')(fakeEvent);
-    expect(onChange.callCount).to.be.equal(1);
-    setTimeout(() => {
-      wrapper.prop('onSwipingRight')(fakeEvent);
-      expect(onChange.callCount).to.be.equal(2);
-      cb();
-    }, 200);
+  context('With buffer', () => {
+    function simulateMovementAndExpectMove(x, y) {
+      const start = 400;
+      wrapper.simulate('touchStart', getFakeEventMoveSwipe(start, start));
+      wrapper.simulate('touchMove', getFakeEventMoveSwipe(start + x, start + y));
+      const elements = wrapper.find('.SwipeGallery-element');
+      for (const element of elements.nodes) {
+        if (x) {
+          expect(element.style.left).to.have.equal(`${x}px`);
+        } else {
+          expect(element.style.top).to.have.equal(`${y}px`);
+        }
+      }
+      wrapper.simulate('touchEnd', getFakeEventMoveSwipe(start + x + x, start + y + y));
+      for (const element of elements.nodes) {
+        if (x > 0) {
+          expect(element.style.left).to.have.equal('');
+        } else {
+          expect(element.style.top).to.have.equal('');
+        }
+      }
+    }
+    
+    it('Simulate left swipe, change position of elements', () => {
+      loadWrapper();
+      simulateMovementAndExpectMove(-50, 0);
+      expect(onChange).to.be.callCount(1);
+      expect(onChange).to.be.calledWith(1, [1, 2, 3]);
+    });
+    it('Simulate right swipe, change position of elements', () => {
+      loadWrapper();
+      simulateMovementAndExpectMove(50, 0);
+      expect(onChange).to.be.callCount(1);
+      expect(onChange).to.be.calledWith(4, [4, 0, 1]);
+    });
+    it('Simulate up swipe, change position of elements', () => {
+      loadWrapper(SwipeGallery.VERTICAL);
+      simulateMovementAndExpectMove(0, -50);
+      expect(onChange).to.be.callCount(1);
+      expect(onChange).to.be.calledWith(1, [1, 2, 3]);
+    });
+    it('Simulate down swipe, change position of elements', () => {
+      loadWrapper(SwipeGallery.VERTICAL);
+      simulateMovementAndExpectMove(0, 50);
+      expect(onChange).to.be.callCount(1);
+      expect(onChange).to.be.calledWith(4, [4, 0, 1]);
+    });
   });
 });
 
@@ -274,6 +330,7 @@ describe('Diferents number of elements with buffer', () => {
     expect(wrapper.find('.SwipeGallery-next')).to.have.length(0);
     expect(wrapper.find('.SwipeGallery-previous')).to.have.length(0);
   });
+
   it('1 element with maxElements 3 and hideArrowWithNoElements=false', () => {
     const wrapper = getWrapper(1, 3, onChange, false);
     expect(wrapper.find('.SwipeGallery-element--visible')).to.have.length(1);

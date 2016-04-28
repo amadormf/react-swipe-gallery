@@ -1,6 +1,6 @@
 import React from 'react';
 import { storiesOf } from '@kadira/storybook';
-import SwipeGallery from '../../lib/index';
+import SwipeGallery from '../index';
 import '../styles/SwipeGallery.styl';
 
 function getElements(numElements) {
@@ -21,11 +21,16 @@ function getElements(numElements) {
   return elements;
 }
 
+const styles = {
+  width: '90vw',
+  margin: '0 auto',
+};
 storiesOf('Button', module)
   .add('default view', () => (
     <SwipeGallery
       elements={ getElements(5) }
       maxElements={3}
+      customStyles={styles}
     />
   ))
   .add('vertical view', () => (
@@ -35,10 +40,20 @@ storiesOf('Button', module)
       orientation={SwipeGallery.VERTICAL}
     />
   ))
-  .add('With buffer', () => (
+  .add('with buffer', () => (
     <SwipeGallery
       elements={ getElements(5) }
       maxElements={3}
+      customStyles={styles}
+      buffer
+    />
+  ))
+  .add('vertical with buffer', () => (
+    <SwipeGallery
+      elements={ getElements(5) }
+      maxElements={3}
+      customStyles={styles}
+      orientation={SwipeGallery.VERTICAL}
       buffer
     />
   ))
