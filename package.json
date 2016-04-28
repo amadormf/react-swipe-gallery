@@ -8,7 +8,7 @@
   },
   "license": "MIT",
   "scripts": {
-    "prepublish": ". ./.scripts/prepublish.sh",
+    "build": ". ./.scripts/prepublish.sh",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "test": "mocha --require .scripts/mocha_runner src/**/tests/**/*.js",
@@ -17,7 +17,7 @@
     "storybook": "start-storybook -p 9010",
     "publish-storybook": "bash .scripts/publish_storybook.sh",
     "preversion": "npm run lint && npm test",
-    "version": "npm run prepublish",
+    "version": "npm run build",
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {
