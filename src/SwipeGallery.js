@@ -56,7 +56,7 @@ export default class SwipeGallery extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.position) {
+    if (nextProps.position >= 0) {
       this.setState({
         actualPosition: nextProps.position,
         visiblePositions: this._getVisiblePositions(nextProps.position),
