@@ -50,3 +50,5 @@ const gallery = (
 |customStyles|String       |          |Add inline styles to component|
 |disableSwipe|Bool         |  false   |Disable swipe event | 
 |stopPropagation| Bool     |  false   |If is true, call a stopPropagation on touch events'| 
+|infinityGallery |Bool         |  true   |If is true the gallery is infinity|
+|arrow |Object |{ prev: '❮', next: '❯',} | Change the arrow, you can send a string or a element|

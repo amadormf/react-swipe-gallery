@@ -72,7 +72,18 @@ storiesOf('Button', module)
       maxElements={3}
       customStyles={styles}
       buffer
-      nonRotating
+      infinityGallery={false}
+    />
+  ))
+  .add('Custom arrows', () => (
+    <SwipeGallery
+      elements={getElements(10)}
+      maxElements={3}
+      buffer
+      arrows={{
+        prev: 'p',
+        next: 'n',
+      }}
     />
   ))
 ;

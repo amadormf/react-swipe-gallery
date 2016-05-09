@@ -20,7 +20,8 @@ export default class SwipeGallery extends React.Component {
     customStyles: PropTypes.string,
     disableSwipe: PropTypes.bool,
     stopPropagation: PropTypes.bool,
-    nonRotating: PropTypes.bool,
+    infinityGallery: PropTypes.bool,
+    arrows: PropTypes.object,
   };
 
   static defaultProps = {
@@ -30,7 +31,11 @@ export default class SwipeGallery extends React.Component {
     hideArrows: false,
     hideArrowWithNoElements: true,
     disableSwipe: false,
-    nonRotation: false,
+    infinityGallery: true,
+    arrows: {
+      prev: '❮',
+      next: '❯',
+    },
   };
 
   constructor(props) {
@@ -147,8 +152,8 @@ export default class SwipeGallery extends React.Component {
   }
 
   _canMove(type, position) {
-    const { elements, maxElements, nonRotating } = this.props;
-    if (!nonRotating) {
+    const { elements, maxElements, infinityGallery } = this.props;
+    if (infinityGallery) {
       return true;
     }
     if (type === 'prev') {
@@ -366,7 +371,7 @@ export default class SwipeGallery extends React.Component {
     const {
       hideArrows,
       hideArrowWithNoElements,
-      nonRotating,
+      infinityGallery,
       elements,
       maxElements,
     } = this.props;
@@ -379,7 +384,7 @@ export default class SwipeGallery extends React.Component {
     ) {
       return false;
     }
-    if (!nonRotating) {
+    if (infinityGallery) {
       return true;
     }
     if (type === 'prev') {
@@ -393,6 +398,7 @@ export default class SwipeGallery extends React.Component {
       orientation,
       className,
       customStyles,
+      arrows,
     } = this.props;
 
     const swipeGalleryClasses = classNames({
@@ -427,7 +433,7 @@ export default class SwipeGallery extends React.Component {
               this._move(e, -1);
             }}
           >
-            <div>{'❮'}</div>
+            <div>{arrows.prev}</div>
           </div>
         }
         <div
@@ -446,7 +452,7 @@ export default class SwipeGallery extends React.Component {
               this._move(e, 1);
             }}
           >
-            <div>{'❯'}</div>
+            <div>{arrows.next}</div>
           </div>
         }
       </div>

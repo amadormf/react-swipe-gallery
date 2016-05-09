@@ -90,7 +90,7 @@ describe('Swipe gallery', () => {
   });
 
   it('Show next button and previous button', () => {
-    const elements = getElements(3);
+    const elements = getElements(5);
 
     const wrapper = shallow(
       <SwipeGallery
@@ -224,6 +224,21 @@ describe('Swipe gallery', () => {
     );
     expect(wrapper.find('.SwipeGallery-next')).to.have.length(0);
     expect(wrapper.find('.SwipeGallery-previous')).to.have.length(0);
+  });
+
+  it('Add custom arrows', () => {
+    const wrapper = shallow(
+      <SwipeGallery
+        elements={getElements(10)}
+        maxElements={3}
+        arrows={{
+          prev: 'p',
+          next: 'n',
+        }}
+      />
+    );
+    expect(wrapper.find('.SwipeGallery-previous').text()).is.equal('p');
+    expect(wrapper.find('.SwipeGallery-next').text()).is.equal('n');
   });
 });
 
@@ -453,7 +468,7 @@ describe('Add nonRotating gallery', () => {
         maxElements={3}
         onChangePosition={onChange}
         buffer
-        nonRotating
+        infinityGallery={false}
       />
     );
   });
