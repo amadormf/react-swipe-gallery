@@ -52,3 +52,5 @@ const gallery = (
 |stopPropagation| Bool     |  false   |If is true, call a stopPropagation on touch events'| 
 |infinityGallery |Bool         |  true   |If is true the gallery is infinity|
 |arrow |Object |{ prev: '❮', next: '❯',} | Change the arrow, you can send a string or a element|
+|initialPosition|Number | 0 | Initial position of gallery |
+|position| Number | | Change position of gallery |
