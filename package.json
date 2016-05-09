@@ -15,7 +15,7 @@
     "test:karma": "karma start",
     "test:watch": "npm run test -- --watch --watch-extensions js",
     "storybook": "start-storybook -p 9010",
-    "publish-storybook": "bash .scripts/publish_storybook.sh",
+    "storybook:publish": "bash .scripts/publish_storybook.sh",
     "preversion": "npm run lint && npm test",
     "version": "npm run build",
     "postversion": "git push --follow-tags"

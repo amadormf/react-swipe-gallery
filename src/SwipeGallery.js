@@ -275,9 +275,14 @@ export default class SwipeGallery extends React.Component {
         if (nodes[i] === newElementToView) {
           if (i === 0) {
             nodes[i].style.left = `${(-newElementSize + quantityToMove)}px`;
+            nodes[i].style.right = '';
           } else {
-            nodes[i].style.right = `${-(newElementSize + quantityToMove)}px`;
-            nodes[i].style.left = '';
+            if (this.props.buffer) {
+              nodes[i].style.right = `${-(newElementSize + quantityToMove)}px`;
+              nodes[i].style.left = '';
+            } else {
+              nodes[i].style.left = `${(quantityToMove)}px`;
+            }
           }
         } else {
           nodes[i].style.left = pxToMove;

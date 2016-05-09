@@ -390,7 +390,6 @@ describe('Diferents number of elements with buffer', () => {
   });
 });
 
-
 describe('Swipe gallery with prop buffer=true', () => {
   let elements;
   let wrapper;
