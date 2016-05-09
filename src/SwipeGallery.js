@@ -17,11 +17,13 @@ export default class SwipeGallery extends React.Component {
     buffer: PropTypes.bool,
     hideArrows: PropTypes.bool,
     hideArrowWithNoElements: PropTypes.bool,
-    customStyles: PropTypes.string,
+    customStyles: PropTypes.object,
     disableSwipe: PropTypes.bool,
     stopPropagation: PropTypes.bool,
     infinityGallery: PropTypes.bool,
     arrows: PropTypes.object,
+    position: PropTypes.object,
+    initialPosition: PropTypes.object,
   };
 
   static defaultProps = {
@@ -36,19 +38,29 @@ export default class SwipeGallery extends React.Component {
       prev: '❮',
       next: '❯',
     },
+    initialPosition: 0,
+    position: 0,
   };
 
   constructor(props) {
     super(props);
     this.allowSwipe = true;
     this.state = {
-      actualPosition: 0,
+      actualPosition: this.props.initialPosition,
       visiblePositions: this._getVisiblePositions(0),
       swiping: false,
       canMovePrev: this._canMove('prev', 0),
       canMoveNext: this._canMove('next', 0),
     };
     this._resetMove();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.position) {
+      this.setState({
+        actualPosition: nextProps.position,
+      });
+    }
   }
 
   _resetMove() {
@@ -98,7 +110,7 @@ export default class SwipeGallery extends React.Component {
           false,
           this.props.elements[firstPosition],
           this.props.orientation === SwipeGallery.HORIZONTAL ? 'left' : 'top',
-          firstPosition
+          'first'
         )
       );
 
@@ -111,7 +123,7 @@ export default class SwipeGallery extends React.Component {
           false,
           this.props.elements[lastPosition],
           this.props.orientation === SwipeGallery.HORIZONTAL ? 'right' : 'bottom',
-          lastPosition
+          'last'
         )
       );
     }

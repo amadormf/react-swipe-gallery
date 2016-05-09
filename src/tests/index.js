@@ -240,6 +240,30 @@ describe('Swipe gallery', () => {
     expect(wrapper.find('.SwipeGallery-previous').text()).is.equal('p');
     expect(wrapper.find('.SwipeGallery-next').text()).is.equal('n');
   });
+
+  it('Check prop initial position', () => {
+    const wrapper = shallow(
+      <SwipeGallery
+        elements={getElements(4)}
+        maxElements={3}
+        initialPosition={2}
+      />
+    );
+    expect(wrapper.state('actualPosition')).to.equal(2);
+  });
+
+  it('Check prop position', () => {
+    const wrapper = shallow(
+      <SwipeGallery
+        elements={getElements(4)}
+        maxElements={3}
+      />
+    );
+    wrapper.setProps({
+      position: 2,
+    });
+    expect(wrapper.state('actualPosition')).to.equal(2);
+  });
 });
 
 describe('SwipeGallery, swipe move', () => {
