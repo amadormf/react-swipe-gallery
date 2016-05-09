@@ -86,4 +86,12 @@ storiesOf('Button', module)
       }}
     />
   ))
+  .add('Change position', () => (
+    <SwipeGallery
+      elements={getElements(10)}
+      maxElements={3}
+      buffer
+      initialPosition={4}
+    />
+  ))
 ;
