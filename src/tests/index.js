@@ -436,3 +436,39 @@ describe('stopPropagation parameter', () => {
     expect(onTouch).to.have.callCount(0);
   });
 });
+
+describe('Add nonRotating gallery', () => {
+  let wrapper;
+  let elements;
+  let onChange;
+  before(() => {
+    elements = getElements(5);
+  });
+
+  beforeEach(() => {
+    onChange = sinon.spy();
+    wrapper = mount(
+      <SwipeGallery
+        elements={elements}
+        maxElements={3}
+        onChangePosition={onChange}
+        buffer
+        nonRotating
+      />
+    );
+  });
+
+  it('Check if is on the last position on gallery, next position is disabled', () => {
+    simulateMovement(-50, 0, wrapper);
+    simulateMovement(-50, 0, wrapper);
+    expect(wrapper.find('.SwipeGallery-next')).to.have.length(0);
+    expect(onChange).to.be.callCount(2);
+    simulateMovement(-50, 0, wrapper);
+    expect(onChange).to.be.callCount(2);
+  });
+  it('Check if is on the first position on gallery, previous position is disabled', () => {
+    expect(wrapper.find('.SwipeGallery-prev')).to.have.length(0);
+    simulateMovement(50, 0, wrapper);
+    expect(onChange).to.be.callCount(0);
+  });
+});

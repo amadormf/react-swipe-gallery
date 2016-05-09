@@ -20,6 +20,7 @@ export default class SwipeGallery extends React.Component {
     customStyles: PropTypes.string,
     disableSwipe: PropTypes.bool,
     stopPropagation: PropTypes.bool,
+    nonRotating: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -29,6 +30,7 @@ export default class SwipeGallery extends React.Component {
     hideArrows: false,
     hideArrowWithNoElements: true,
     disableSwipe: false,
+    nonRotation: false,
   };
 
   constructor(props) {
@@ -38,6 +40,8 @@ export default class SwipeGallery extends React.Component {
       actualPosition: 0,
       visiblePositions: this._getVisiblePositions(0),
       swiping: false,
+      canMovePrev: this._canMove('prev', 0),
+      canMoveNext: this._canMove('next', 0),
     };
     this._resetMove();
   }
@@ -142,6 +146,17 @@ export default class SwipeGallery extends React.Component {
     return calculateNewPosition;
   }
 
+  _canMove(type, position) {
+    const { elements, maxElements, nonRotating } = this.props;
+    if (!nonRotating) {
+      return true;
+    }
+    if (type === 'prev') {
+      return !(position === 0);
+    }
+    return !(position === elements.length - maxElements);
+  }
+
   _move(e, movePositions) {
     e.preventDefault();
     e.stopPropagation();
@@ -151,6 +166,8 @@ export default class SwipeGallery extends React.Component {
     this.setState({
       actualPosition: position,
       visiblePositions: this._getVisiblePositions(position),
+      canMovePrev: this._canMove('prev', position),
+      canMoveNext: this._canMove('next', position),
     }, () => {
       if (typeof this.props.onChangePosition === 'function') {
         this.props.onChangePosition(
@@ -160,6 +177,7 @@ export default class SwipeGallery extends React.Component {
       }
     });
   }
+
 
   _isSwipeDisabled() {
     return (this.props.disableSwipe || this.props.elements.length < this.props.maxElements);
@@ -292,8 +310,12 @@ export default class SwipeGallery extends React.Component {
           if (i === 0) {
             nodes[i].style.top = `${(-newElementSize + quantityToMove)}px`;
           } else {
-            nodes[i].style.bottom = `${-(newElementSize + quantityToMove)}px`;
-            nodes[i].style.top = '';
+            if (this.props.buffer) {
+              nodes[i].style.bottom = `${-(newElementSize + quantityToMove)}px`;
+              nodes[i].style.top = '';
+            } else {
+              nodes[i].style.top = `${(quantityToMove)}px`;
+            }
           }
         } else {
           nodes[i].style.top = pxToMove;
@@ -314,8 +336,21 @@ export default class SwipeGallery extends React.Component {
     const touchY = e.changedTouches[0].clientY;
     const moveX = touchX - this.movement.touchX;
     const moveY = touchY - this.movement.touchY;
-    const accumulatorX = this.movement.accumulatorX + moveX;
-    const accumulatorY = this.movement.accumulatorY + moveY;
+    let accumulatorX = 0;
+    let accumulatorY = 0;
+    if (
+      (moveX > 0 && this.state.canMovePrev) ||
+      (moveX < 0 && this.state.canMoveNext)
+    ) {
+      accumulatorX = this.movement.accumulatorX + moveX;
+    }
+
+    if (
+      (moveY > 0 && this.state.canMovePrev) ||
+      (moveY < 0 && this.state.canMoveNext)
+    ) {
+      accumulatorY = this.movement.accumulatorY + moveY;
+    }
 
     return {
       touchX,
@@ -327,19 +362,38 @@ export default class SwipeGallery extends React.Component {
     };
   }
 
+  _showArrow(type) {
+    const {
+      hideArrows,
+      hideArrowWithNoElements,
+      nonRotating,
+      elements,
+      maxElements,
+    } = this.props;
+
+    if (hideArrows) {
+      return false;
+    }
+    if (hideArrowWithNoElements
+      && elements.length < maxElements && hideArrowWithNoElements
+    ) {
+      return false;
+    }
+    if (!nonRotating) {
+      return true;
+    }
+    if (type === 'prev') {
+      return this.state.canMovePrev;
+    }
+    return this.state.canMoveNext;
+  }
+
   render() {
     const {
       orientation,
       className,
-      hideArrows,
-      hideArrowWithNoElements,
-      elements,
-      maxElements,
       customStyles,
     } = this.props;
-
-    const showArrows = !hideArrows &&
-      !(elements.length < maxElements && hideArrowWithNoElements);
 
     const swipeGalleryClasses = classNames({
       SwipeGallery: true,
@@ -365,7 +419,8 @@ export default class SwipeGallery extends React.Component {
         onTouchEnd={(e) => this._handleTouchEnd(e)}
         style={customStyles}
       >
-        { showArrows &&
+        { this._showArrow('prev')
+          &&
           <div
             className={arrowClassesLeft}
             onClick={(e) => {
@@ -383,7 +438,8 @@ export default class SwipeGallery extends React.Component {
 
         </div>
         {
-          showArrows &&
+          this._showArrow('next')
+          &&
           <div
             className = {arrowClassesRight}
             onClick={(e) => {

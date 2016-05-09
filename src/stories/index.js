@@ -66,4 +66,13 @@ storiesOf('Button', module)
       buffer
     />
   ))
+  .add('horizontal with buffer and nonRotating', () => (
+    <SwipeGallery
+      elements={ getElements(5) }
+      maxElements={3}
+      customStyles={styles}
+      buffer
+      nonRotating
+    />
+  ))
 ;
