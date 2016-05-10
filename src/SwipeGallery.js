@@ -57,12 +57,8 @@ export default class SwipeGallery extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.position >= 0) {
-      this.setState({
-        actualPosition: nextProps.position,
-        visiblePositions: this._getVisiblePositions(nextProps.position),
-        canMovePrev: this._canMove('prev', nextProps.position),
-        canMoveNext: this._canMove('next', nextProps.position),
-      });
+      const movePositions = nextProps.position - this.state.actualPosition;
+      this._move(null, movePositions);
     }
   }
 
@@ -178,8 +174,10 @@ export default class SwipeGallery extends React.Component {
   }
 
   _move(e, movePositions) {
-    e.preventDefault();
-    e.stopPropagation();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
 
     const position = this._calculatePosition(movePositions);
 

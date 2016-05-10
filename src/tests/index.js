@@ -187,7 +187,7 @@ describe('Swipe gallery', () => {
       <SwipeGallery
         elements={elements}
         maxElements={3}
-        onChangePosition= {onChange}
+        onChangePosition={onChange}
       />
     );
     wrapper.find('.SwipeGallery-previous').simulate('click', fakeEvent);
@@ -253,16 +253,28 @@ describe('Swipe gallery', () => {
   });
 
   it('Check prop position', () => {
+    const onChange = sinon.spy();
     const wrapper = shallow(
       <SwipeGallery
         elements={getElements(4)}
         maxElements={3}
+        onChangePosition={onChange}
       />
     );
+
     wrapper.setProps({
       position: 2,
     });
     expect(wrapper.state('actualPosition')).to.equal(2);
+    expect(onChange).to.be.callCount(1);
+    expect(onChange).to.be.calledWith(2, [2, 3, 0]);
+
+    wrapper.setProps({
+      position: 0,
+    });
+    expect(wrapper.state('actualPosition')).to.equal(0);
+    expect(onChange).to.be.callCount(2);
+    expect(onChange).to.be.calledWith(0, [0, 1, 2]);
   });
 });
 
