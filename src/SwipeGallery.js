@@ -393,7 +393,7 @@ export default class SwipeGallery extends React.Component {
       return false;
     }
     if (hideArrowWithNoElements
-      && elements.length < maxElements && hideArrowWithNoElements
+      && elements.length <= maxElements && hideArrowWithNoElements
     ) {
       return false;
     }
