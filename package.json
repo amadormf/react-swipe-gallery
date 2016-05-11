@@ -22,7 +22,7 @@
     "postversion": "git push --follow-tags"
   },
   "devDependencies": {
-    "@kadira/storybook": "^1.11.0",
+    "@kadira/storybook": "^1.25.0",
     "babel-cli": "^6.5.0",
     "babel-core": "^6.5.0",
     "babel-eslint": "^6.0.2",

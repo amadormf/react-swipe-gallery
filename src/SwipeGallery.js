@@ -22,8 +22,8 @@ export default class SwipeGallery extends React.Component {
     stopPropagation: PropTypes.bool,
     infinityGallery: PropTypes.bool,
     arrows: PropTypes.object,
-    position: PropTypes.object,
-    initialPosition: PropTypes.object,
+    position: PropTypes.number,
+    initialPosition: PropTypes.number,
   };
 
   static defaultProps = {
@@ -198,11 +198,11 @@ export default class SwipeGallery extends React.Component {
 
 
   _isSwipeDisabled() {
-    return (this.props.disableSwipe || this.props.elements.length < this.props.maxElements);
+    return (this.props.disableSwipe || this.props.elements.length <= this.props.maxElements);
   }
 
   _handleTouchStart(e) {
-    if (this.props.disableSwipe) {
+    if (this._isSwipeDisabled()) {
       return;
     }
 

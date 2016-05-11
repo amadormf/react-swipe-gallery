@@ -390,6 +390,11 @@ describe('SwipeGallery, swipe move', () => {
       simulateMovement(50, 0, wrapper);
       expect(onChange).to.be.callCount(0);
     });
+    it('with element.length === maxElements', () => {
+      elements = getElements(3);
+      simulateMovement(50, 0, wrapper);
+      expect(onChange).to.be.callCount(0);
+    });
     it('with prop disableSwipe=true', () => {
       elements = getElements(5);
       wrapper = mount(
@@ -406,7 +411,7 @@ describe('SwipeGallery, swipe move', () => {
   });
 });
 
-describe('Diferents number of elements with buffer', () => {
+describe('Differents number of elements with buffer', () => {
   function getWrapper(numElements, maxElements, onChange, hideArrowWithNoElements) {
     const elements = getElements(numElements);
     return shallow(
