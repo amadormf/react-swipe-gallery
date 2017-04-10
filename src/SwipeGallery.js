@@ -11,7 +11,7 @@ export default class SwipeGallery extends React.Component {
   static propTypes = {
     elements: PropTypes.array.isRequired,
     maxElements: PropTypes.number,
-    onChangePosition: PropTypes.function,
+    onChangePosition: PropTypes.func,
     orientation: PropTypes.string,
     className: PropTypes.string,
     buffer: PropTypes.bool,
@@ -254,6 +254,7 @@ export default class SwipeGallery extends React.Component {
     const moved = this.props.orientation === SwipeGallery.HORIZONTAL
                     ? this.movement.accumulatorX
                     : this.movement.accumulatorY;
+
     if (this.props.elements.length > this.props.maxElements) {
       if (moved < 0) {
         movePosition = SwipeGallery.NEXT;
