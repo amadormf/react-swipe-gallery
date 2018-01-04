@@ -7,6 +7,11 @@
 require('babel-core/register');
 require('babel-polyfill');
 
+// Configure enzyme
+var configure = require('enzyme').configure;
+var Adapter = require('enzyme-adapter-react-16');
+configure({ adapter: new Adapter() });
+
 // Add jsdom support, which is required for enzyme.
 var jsdom = require('jsdom').jsdom;
 

@@ -9,17 +9,45 @@ const updateConfig = require('./user/modify_webpack_config');
 
 const config = {
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.styl$/,
-        loader: 'style!css?modules&importLoaders=2&sourceMap&localIdentName=[local]' +
-          '!stylus?outputStyle=expanded&sourceMap',
+        use: [
+          {
+            loader: 'style-loader',
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              modules: true,
+              importLoaders: 2,
+              sourceMap: true,
+              localIdentName: '[local]',
+            },
+          },
+          {
+            loader: 'stylus-loader',
+            options: {
+              outputStyle: 'expanded',
+              sourceMap: true,
+            },
+          },
+        ],
       },
       {
         test: /\.css$/,
-        loaders: [
-          'style-loader',
-          'css-loader?modules&importLoaders=1&localIdentName=[local]',
+        use: [
+          {
+            loader: 'style-loader',
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              modules: true,
+              importLoaders: 1,
+              localIdentName: '[local]',
+            },
+          },
         ],
       },
     ],
