@@ -40,7 +40,7 @@ export default class SwipeGallery extends React.Component {
       next: '❯',
     },
     initialPosition: 0,
-    position: 0,
+    position: null,
   };
 
   constructor(props) {
@@ -57,7 +57,7 @@ export default class SwipeGallery extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.position >= 0) {
+    if (nextProps !== null && nextProps.position >= 0) {
       const movePositions = nextProps.position - this.state.actualPosition;
       this._move(null, movePositions);
     }
