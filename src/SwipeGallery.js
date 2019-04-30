@@ -175,7 +175,7 @@ export default class SwipeGallery extends React.Component {
   }
 
   _move(e, movePositions) {
-    if (e) {
+    if (e && e.cancelable) {
       e.preventDefault();
       e.stopPropagation();
     }
