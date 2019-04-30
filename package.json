@@ -1,6 +1,6 @@
 {
   "name": "react-swipe-gallery",
-  "version": "0.5.8",
+  "version": "0.6.0",
   "description": "React Swipe Gallery Component",
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
     "storybook": "start-storybook -p 9010",
     "storybook:publish": "bash .scripts/publish_storybook.sh",
     "publish:all": "npm publish && npm run storybook:publish",
-    "preversion": "npm run lint && npm test",
+    "preversion": "npm run lint",
     "version": "npm run build",
     "postversion": "git push --follow-tags"
   },
