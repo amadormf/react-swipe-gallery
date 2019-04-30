@@ -294,7 +294,7 @@ describe('SwipeGallery, swipe move', () => {
       />
     );
 
-    const nodes = wrapper.find('.SwipeGallery-element').nodes;
+    const nodes = wrapper.find('.SwipeGallery-element').getElements();
 
     for (let i = 0; i < nodes.length; ++i) {
       nodes[i].offsetWidth = SIZE_ELEMENT;
@@ -348,7 +348,7 @@ describe('SwipeGallery, swipe move', () => {
       wrapper.simulate('touchMove', getFakeEventMoveSwipe(start + x, start + y));
       const subElements = wrapper.find('.SwipeGallery-element');
       wrapper.simulate('touchEnd', getFakeEventMoveSwipe(start + x + x, start + y + y));
-      for (const element of subElements.nodes) {
+      for (const element of subElements.getElements()) {
         if (x > 0) {
           expect(element.style.left).to.have.equal('');
         } else {
